@@ -50,6 +50,7 @@ dev-python/spur
 dev-python/sshtunnel
 dev-python/tempest
 dev-python/trustme
+>=dev-python/trio-0.22.0
 dev-python/twine
 dev-python/watchfiles
 dev-ros/roswtf
@@ -78,4 +79,5 @@ ros-meta/ros_comm
 sci-geosciences/gnome-maps
 >=sys-apps/bat-0.18.1
 virtual/rust
+www-apps/radicale
 >=x11-themes/adwaita-icon-theme-3.36
