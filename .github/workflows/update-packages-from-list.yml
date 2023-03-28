@@ -3,6 +3,15 @@ on:
   schedule:
     - cron:  '0 7 * * 1'
   workflow_dispatch:
+    inputs:
+      project_name:
+        description: 'Name of a project'
+        default: 'Flatcar tactical, release planning, and roadmap'
+        type: string
+      column_name:
+        description: 'Name of a column in the project'
+        default: 'In Progress'
+        type: string
 
 jobs:
   keep-packages-updated:
@@ -58,16 +67,14 @@ jobs:
           cd ..
           new_head=$(git -C portage-stable rev-parse HEAD)
           updated=0
-          count=0
           if [[ "${new_head}" != "${old_head}" ]]; then
               updated=1
-              count=$(git -C portage-stable rev-list --count "${old_head}..${new_head}")
           fi
           todaydate=$(date +%Y-%m-%d)
           echo "UPDATED=${updated}" >>"${GITHUB_OUTPUT}"
-          echo "COUNT=${count}" >>"${GITHUB_OUTPUT}"
           echo "TODAYDATE=${todaydate}" >>"${GITHUB_OUTPUT}"
       - name: Create pull request for main branch
+        id: create-pull-request
         uses: peter-evans/create-pull-request@v4
         if: steps.update-listed-packages.outputs.UPDATED == 1
         with:
@@ -77,5 +84,27 @@ jobs:
           delete-branch: true
           base: main
           title: Weekly package updates ${{steps.update-listed-packages.outputs.TODAYDATE }}
-          body: Updated ${{steps.update-listed-packages.outputs.COUNT }} package(s).
+          body: |
+            CI: TODO
+
+            Should be merged together with COREOS_OVERLAY_PR.
+
+            --
+
+            TODO: Changes.
+
+            --
+
+            - [ ] changelog
+            - [ ] image diff
           labels: main
+          draft: true
+      - name: Add PR to tactical board
+        uses: peter-evans/create-or-update-project-card@v2
+        if: steps.update-listed-packages.outputs.UPDATED == 1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          project-location: ${{ github.repository_owner }}
+          project-name: ${{ inputs.project_name }}
+          column-name: ${{ inputs.column_name }}
+          issue-number: ${{ steps.create-pull-request.outputs.pull-request-number }}
