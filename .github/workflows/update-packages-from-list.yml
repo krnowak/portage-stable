@@ -1,16 +1,23 @@
+# name: Flatcar tactical, release planning, and roadmap
+# col: In Progress
+
+# name: Test board
+# col: Todo
+
 name: Keep updated packages updated
 on:
+  pull_request:
   schedule:
     - cron:  '0 7 * * 1'
   workflow_dispatch:
     inputs:
       project_name:
         description: 'Name of a project'
-        default: 'Flatcar tactical, release planning, and roadmap'
+        default: 'Test board'
         type: string
       column_name:
         description: 'Name of a column in the project'
-        default: 'In Progress'
+        default: 'Todo'
         type: string
 
 jobs:
@@ -31,7 +38,7 @@ jobs:
           # quarter milion of commits. It is about two years worth of changes.
           # Is is needed by the sync script to find out the hash of the last commit
           # that made the changes to the package.
-          fetch-depth: 250000
+          fetch-depth: 1000
           ref: master
       - name: Checkout build scripts
         uses: actions/checkout@v3
@@ -63,6 +70,10 @@ jobs:
                   continue
               fi
               GENTOO_REPO=../gentoo ../flatcar-build-scripts/sync-with-gentoo "${package}"
+              new_head=$(git rev-parse HEAD)
+              if [[ "${new_head}" != "${old_head}" ]]; then
+                  break
+              fi
           done < <(grep '^[^#]' .github/workflows/packages-list)
           cd ..
           new_head=$(git -C portage-stable rev-parse HEAD)
