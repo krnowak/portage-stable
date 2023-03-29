@@ -1,16 +1,23 @@
+# name: Flatcar tactical, release planning, and roadmap
+# col: In Progress
+
+# name: Test board
+# col: Todo
+
 name: Keep updated packages updated
 on:
+  pull_request:
   schedule:
     - cron:  '0 7 * * 1'
   workflow_dispatch:
     inputs:
       project_name:
         description: 'Name of a project'
-        default: 'Flatcar tactical, release planning, and roadmap'
+        default: 'Test board'
         type: string
       column_name:
         description: 'Name of a column in the project'
-        default: 'In Progress'
+        default: 'Todo'
         type: string
 
 jobs:
